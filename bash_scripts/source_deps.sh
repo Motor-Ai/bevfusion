@@ -1,0 +1,1 @@
+pip install https://github.com/Dao-AILab/flash-attention/releases/download/v0.2.1/flash_attn-0.2.1+cu113torch1.11.0-cp38-cp38-linux_x86_64.whl

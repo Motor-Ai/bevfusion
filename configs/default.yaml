@@ -2,7 +2,7 @@ seed: 0
 deterministic: false
 
 checkpoint_config:
-  interval: 1
+  interval: 50
   max_keep_ckpts: 1
 
 log_config:

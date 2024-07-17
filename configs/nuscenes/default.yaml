@@ -301,6 +301,6 @@ data:
     box_type_3d: LiDAR
 
 evaluation:
-  interval: 1
+  interval: 50
   pipeline: ${test_pipeline}
  
