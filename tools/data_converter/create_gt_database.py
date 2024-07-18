@@ -268,6 +268,11 @@ def create_groundtruth_database(
     group_counter = 0
     for j in track_iter_progress(list(range(len(dataset)))):
         input_dict = dataset.get_data_info(j)
+        
+        for key, val in input_dict.items():
+            if key == 'lidar_path':
+                input_dict['lidar_path'] = data_path + input_dict['lidar_path'][24:]
+        
         dataset.pre_pipeline(input_dict)
         example = dataset.pipeline(input_dict)
         annos = example["ann_info"]

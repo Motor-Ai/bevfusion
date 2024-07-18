@@ -79,7 +79,7 @@ def create_nuscenes_infos(root_path,
             len(train_scenes), len(val_scenes)))
     train_nusc_infos, val_nusc_infos = _fill_trainval_infos(
         nusc, train_scenes, val_scenes, test, max_sweeps=max_sweeps, max_radar_sweeps=max_radar_sweeps)
-
+    
     metadata = dict(version=version)
     if test:
         print('test sample: {}'.format(len(train_nusc_infos)))
@@ -88,7 +88,6 @@ def create_nuscenes_infos(root_path,
                              '{}_infos_test_radar.pkl'.format(info_prefix))
         mmcv.dump(data, info_path)
     else:
-        print(info_prefix)
         print('train sample: {}, val sample: {}'.format(
             len(train_nusc_infos), len(val_nusc_infos)))
         data = dict(infos=train_nusc_infos, metadata=metadata)
@@ -177,7 +176,7 @@ def _fill_trainval_infos(nusc,
         lidar_path, boxes, _ = nusc.get_sample_data(lidar_token)
 
         mmcv.check_file_exist(lidar_path)
-
+        
         info = {
             'lidar_path': lidar_path,
             'token': sample['token'],
@@ -198,6 +197,9 @@ def _fill_trainval_infos(nusc,
         e2g_t = info['ego2global_translation']
         l2e_r_mat = Quaternion(l2e_r).rotation_matrix
         e2g_r_mat = Quaternion(e2g_r).rotation_matrix
+        
+        # for sagemaker, needs to be handled with condition
+        info['lidar_path'] = "/opt/ml/input/data/train" + info['lidar_path'][13:]
 
         # obtain 6 image's information per frame
         camera_types = [
@@ -213,6 +215,10 @@ def _fill_trainval_infos(nusc,
             cam_path, _, cam_intrinsic = nusc.get_sample_data(cam_token)
             cam_info = obtain_sensor2top(nusc, cam_token, l2e_t, l2e_r_mat,
                                          e2g_t, e2g_r_mat, cam)
+            
+            # for sagemaker, needs to be handled with condition
+            cam_info['data_path'] = "/opt/ml/input/data/train" + cam_info['data_path'][13:]
+            
             cam_info.update(cam_intrinsic=cam_intrinsic)
             info['cams'].update({cam: cam_info})
 
@@ -229,6 +235,10 @@ def _fill_trainval_infos(nusc,
 
                     radar_info = obtain_sensor2top(nusc, radar_token, l2e_t, l2e_r_mat,
                                                 e2g_t, e2g_r_mat, radar_name)
+                    
+                    # for sagemaker, needs to be handled with condition
+                    radar_info['data_path'] = "/opt/ml/input/data/train" + radar_info['data_path'][13:]
+                    
                     sweeps.append(radar_info)
                     radar_token = radar_rec['prev']
                     radar_rec = nusc.get('sample_data', radar_token)
@@ -237,6 +247,10 @@ def _fill_trainval_infos(nusc,
 
                     radar_info = obtain_sensor2top(nusc, radar_token, l2e_t, l2e_r_mat,
                                                 e2g_t, e2g_r_mat, radar_name)
+                    
+                    # for sagemaker, needs to be handled with condition
+                    radar_info['data_path'] = "/opt/ml/input/data/train" + radar_info['data_path'][13:]
+                    
                     sweeps.append(radar_info)
             
             info['radars'].update({radar_name: sweeps})
